@@ -2922,26 +2922,37 @@ function startQuiz(mode) {
         currentCombo++;
         if (currentCombo > maxCombo) maxCombo = currentCombo;
 
-        // --- 【機能②】ランク用ポイント計算（NaN絶対ガード付き） ---
-        const totalTimeLimit = (typeof currentDifficultyTime !== 'undefined' && currentDifficultyTime > 0) ? currentDifficultyTime : 10;
-        const timeLeft = (typeof currentQuizTimeLeft !== 'undefined' && !isNaN(currentQuizTimeLeft)) ? currentQuizTimeLeft : 0;
-        
-        const timeRatio = Math.min(100, Math.max(0, (timeLeft / totalTimeLimit) * 100));
-        const basePt = 25 + (timeRatio * 0.5);
-        const multiplier = (typeof getComboMultiplier === 'function') ? getComboMultiplier(currentCombo) : 1.0;
-        const gainedPoints = Math.round(basePt * multiplier) || 0;
+        // --- 【機能】 ランク用ポイント計算 (難易度倍率＆NaN絶対ガード付き) ---
+const totalTimeLimit = (typeof currentDifficultyTime !== 'undefined' && currentDifficultyTime > 0) ? currentDifficultyTime : 10;
+const timeLeft = (typeof currentQuizTimeLeft !== 'undefined' && !isNaN(currentQuizTimeLeft)) ? currentQuizTimeLeft : 0;
 
-        sessionGainedScore = (sessionGainedScore || 0) + gainedPoints;
+// 難易度別の倍率設定
+let diffMultiplier = 1.0;
+if (typeof selectedDifficulty !== 'undefined') {
+    if (selectedDifficulty === 'applied') diffMultiplier = 1.2;          // 応用: 1.2倍
+    else if (selectedDifficulty === 'hard') diffMultiplier = 1.5;        // 発展: 1.5倍
+    else if (selectedDifficulty === 'tenfu') diffMultiplier = 2.0;       // 天賦: 2.0倍
+    else if (selectedDifficulty === 'kiwami' || selectedDifficulty === 'ultimate') diffMultiplier = 3.0; // 極: 3.0倍
+}
 
-        // 累計ポイントの安全な取得・加算
-        let currentTotalScore = parseInt(localStorage.getItem('target1900_total_score'), 10);
-        if (isNaN(currentTotalScore)) currentTotalScore = 0;
-        
-        const newTotalScore = currentTotalScore + gainedPoints;
-        localStorage.setItem('target1900_total_score', newTotalScore);
+const timerRatio = Math.min(100, Math.max(0, (timeLeft / totalTimeLimit) * 100));
+const basePt = 25 + (timerRatio * 0.5);
+const comboMultiplier = (typeof getComboMultiplier === 'function') ? getComboMultiplier(currentCombo) : 1.0;
 
-        if (typeof updateComboUI === 'function') updateComboUI();
-        if (typeof showFeedback === 'function') showFeedback(true, `正解! +${gainedPoints}pt`, wordObj);
+// 基礎点 × コンボ倍率 × 難易度倍率
+const gainedPoints = Math.round(basePt * comboMultiplier * diffMultiplier) || 0;
+
+sessionGainedScore = (sessionGainedScore || 0) + gainedPoints;
+
+// 累計ポイントの安全な取得・加算
+let currentTotalScore = parseInt(localStorage.getItem('target1900_total_score'), 10);
+if (isNaN(currentTotalScore)) currentTotalScore = 0;
+
+const newTotalScore = currentTotalScore + gainedPoints;
+localStorage.setItem('target1900_total_score', newTotalScore);
+
+if (typeof updateComboUI === 'function') updateComboUI();
+if (typeof showFeedback === 'function') showFeedback(true, `正解! +${gainedPoints}pt`, wordObj);
             
     } else {
         // --- 【機能①】間違えたらミスポイントを +2 して保存 ---
