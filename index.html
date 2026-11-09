@@ -2936,7 +2936,7 @@ if (typeof selectedDifficulty !== 'undefined') {
 }
 
 const timerRatio = Math.min(100, Math.max(0, (timeLeft / totalTimeLimit) * 100));
-const basePt = 25 + (timerRatio * 0.5);
+const basePt = 10 + (timerRatio * 0.5);
 const comboMultiplier = (typeof getComboMultiplier === 'function') ? getComboMultiplier(currentCombo) : 1.0;
 
 // 基礎点 × コンボ倍率 × 難易度倍率
