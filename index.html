@@ -285,28 +285,30 @@
                             <i class="fa-solid fa-triangle-exclamation mr-1"></i>ミス <span id="word-mistake-count">0</span>回
                         </span>
                     </div>
-                    
-                    <!-- 単語と各種操作ボタンの横並びコンテナ -->
-                    <div class="flex items-center justify-center gap-2 my-1 px-3 flex-wrap">
-                        <h2 id="word-text" class="text-4xl font-black text-slate-800 dark:text-slate-100 tracking-tight">create</h2>
-                        
-                        <!-- 音声再生ボタン -->
-                        <button onclick="playSpeech()" title="発音を聞く" class="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/60 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-600 dark:text-indigo-300 rounded-xl flex items-center justify-center transition active:scale-90 shadow-xs cursor-pointer shrink-0">
-                            <i class="fa-solid fa-volume-high text-sm"></i>
-                        </button>
+                　　<!-- 単語と音声再生ボタンコンテナ -->
+<div class="flex items-center justify-center gap-2 my-1 px-3 flex-wrap">
+    <h2 id="word-text" class="text-4xl font-black text-slate-800 dark:text-slate-100 tracking-tight">create</h2>
 
-                        <!-- 前へボタン -->
-                        <button id="prev-btn" onclick="prevQuestion()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 font-extrabold text-sm py-2 px-3 rounded-xl transition active:scale-95 flex items-center gap-1 cursor-pointer shrink-0">
-                            <i class="fa-solid fa-chevron-left text-xs"></i>
-                            <span>前へ</span>
-                        </button>
+    <!-- 音声再生ボタン -->
+    <button onclick="playSpeech()" title="発音を聞く" class="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/60 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-600 dark:text-indigo-300 rounded-xl flex items-center justify-center transition active:scale-95">
+        <i class="fa-solid fa-volume-high text-sm"></i>
+    </button>
+</div>
 
-                        <!-- 次へボタン -->
-                        <button id="next-btn" onclick="nextQuestion()" class="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-extrabold text-sm py-2 px-3 rounded-xl shadow-md transition active:scale-95 flex items-center gap-1 cursor-pointer border border-indigo-500/20 shrink-0">
-                            <span>次へ</span>
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
-                    </div>
+<!-- 前へ / 次へボタン（常に隣同士に独立して横並び固定） -->
+<div class="flex items-center justify-center gap-3 my-2 px-4 w-full">
+    <!-- 前へボタン -->
+    <button id="prev-btn" onclick="prevQuestion()" class="flex-1 max-w-[140px] bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 font-extrabold text-sm py-2 px-3 rounded-xl flex items-center justify-center gap-1">
+        <i class="fa-solid fa-chevron-left text-xs"></i>
+        <span>前へ</span>
+    </button>
+
+    <!-- 次へボタン -->
+    <button id="next-btn" onclick="nextQuestion()" class="flex-1 max-w-[140px] bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-extrabold text-sm py-2 px-3 rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-1">
+        <span>次へ</span>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+    </button>
+</div>
 
                     <p id="word-kana" class="text-xs font-bold text-slate-400 dark:text-slate-400 tracking-wider">[ クリエイト ]</p>
                     <p id="typing-hint" class="hidden text-xs font-extrabold text-indigo-600 dark:text-indigo-400 mt-2 bg-indigo-50 dark:bg-indigo-950/80 inline-block px-3 py-1 rounded-md"></p>
