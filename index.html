@@ -78,7 +78,16 @@
             <div id="home-review-btn-container" class="mb-5"></div>
 
             <div class="space-y-4 mb-6">
-                <!-- 出題形式選択 -->
+               <!-- 英単語→日本語、日本語→英単語-->
+				<div class="mb-4">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">出題モード</label>
+        <select id="direction-select-home" onchange="setQuizDirection(this.value)" class="w-full bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold py-2.5 px-3 rounded-xl border-none outline-none text-sm">
+            <option value="en_ja">英単語 ➔ 日本語（標準）</option>
+            <option value="ja_en">日本語 ➔ 英単語</option>
+        </select>
+    </div>
+</div>
+				<!-- 出題形式選択 -->
                 <div class="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <label class="block text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                         <i class="fa-solid fa-gamepad mr-1 text-indigo-500"></i> 出題スタイル
@@ -205,19 +214,18 @@
                 <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
             </button>
         </div>
-	 <!-- 範囲ごとの正解率・苦手エリア可視化グラフ -->
-                <div class="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="block text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                            <i class="fa-solid fa-chart-column mr-1 text-indigo-500"></i> 範囲別正解率アナリティクス
-                        </label>
-                        <button onclick="resetStatsData()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition">リセット</button>
-                    </div>
-                    <div id="stats-graph-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                        <!-- JSで動的に全範囲のグラフバーを生成 -->
-                    </div>
-                </div>
-            </div>
+	<!-- 範囲ごとの正解率・苦手エリア可視化グラフ -->
+<div id="analytics-section" class="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+    <div class="flex justify-between items-center mb-3">
+        <label class="block text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <i class="fa-solid fa-chart-column mr-1 text-indigo-500"></i> 範囲別正解率アナリティクス
+        </label>
+        <button onclick="resetStatsData()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition">リセット</button>
+    </div>
+    <div id="stats-graph-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+        <!-- JSで動的に全範囲のグラフバーを生成 -->
+    </div>
+</div>
        
  <!-- 2. QUIZ SCREEN -->
         <div id="quiz-screen" class="hidden relative bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-white/60 dark:border-slate-800 flex flex-col justify-between overflow-hidden">
@@ -390,7 +398,15 @@
 
                 <!-- 折りたたみ式 簡易設定パネル -->
                 <div id="result-quick-config" class="hidden space-y-3 mb-3 pt-3 border-t border-slate-200/60 dark:border-slate-700">
-                    <!-- 出題数 -->
+                  <!-- 日英モード変更 -->
+					<div class="mb-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 text-center">次のクイズの出題モード</label>
+    <select id="direction-select-result" onchange="setQuizDirection(this.value)" class="w-full bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-600 outline-none text-sm cursor-pointer">
+        <option value="en_ja">英単語 ➔ 日本語</option>
+        <option value="ja_en">日本語 ➔ 英単語</option>
+    </select>
+</div>
+					<!-- 出題数 -->
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-[11px] font-bold text-slate-500 dark:text-slate-400">出題数</label>
@@ -2076,7 +2092,24 @@
         const HISTORY_KEY = 'target1900_mistake_history_v2';
         const STATS_KEY = 'target1900_stats_v1';
         const THEME_KEY = 'target1900_theme_v1';
+		
+	// 出題方向の状態保持（デフォルト: 'en_ja' 英→日）
+window.quizDirection = 'en_ja';
 
+function setQuizDirection(direction) {
+    window.quizDirection = direction;
+
+    // ホーム画面とリザルト画面のセレクトボックスを同期
+    const homeSelect = document.getElementById('direction-select-home');
+    const resultSelect = document.getElementById('direction-select-result');
+
+    if (homeSelect) homeSelect.value = direction;
+    if (resultSelect) resultSelect.value = direction;
+} // ★ この閉じ括弧が抜けていました！
+
+// HTMLから直接呼び出せるようにグローバル参照を登録
+window.setQuizDirection = setQuizDirection;
+		
         // --- ダークモード切替 ---
         function toggleDarkMode() {
             const html = document.documentElement;
@@ -2263,31 +2296,57 @@ function toggleResultQuickConfig() {
             saveMistakeHistoryMap(map);
         }
 
-        function getMistakeList() {
-            const map = getMistakeHistoryMap();
-            return Object.values(map).map(item => item.wordObj);
-        }
+// 弱点データ完全リセット処理（windowに登録して確実に呼び出せるようにする）
+window.resetMistakeData = function() {
+    if (!confirm("弱点単語の記録をリセットしてもよろしいですか？")) {
+        return;
+    }
 
-        function renderReviewButtons() {
-            const list = getMistakeList();
-            const count = list.length;
-            
-            const btnHtml = count > 0 
-                ? `<button type="button" onclick="startQuiz('review')" class="w-full bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-sm cursor-pointer">
+    // 1. localStorage を全クリアして誤答データを削除
+    localStorage.clear();
+
+    // 2. メモリ上の変数も初期化
+    if (typeof mistakeList !== 'undefined') {
+        if (Array.isArray(mistakeList)) mistakeList.length = 0;
+        else mistakeList = [];
+    }
+
+    alert("弱点リストをリセットしました！");
+
+    // 3. UIの表示を即時更新
+    if (typeof renderReviewButtons === 'function') {
+        renderReviewButtons();
+    }
+}
+
+// 弱点復習ボタン＆リセットボタンの描画処理
+function renderReviewButtons() {
+    const homeContainer = document.getElementById('home-review-btn-container');
+    const resultContainer = document.getElementById('review-btn-container');
+
+    const list = typeof getMistakeList === 'function' ? getMistakeList() : [];
+    const count = Array.isArray(list) ? list.length : 0;
+
+    const btnHtml = `
+        <div class="flex items-center gap-2 w-full">
+            ${count > 0 
+                ? `<button type="button" onclick="startQuiz('review')" class="flex-1 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-fire text-rose-500"></i>
-                    <span>弱点集中復習を開始する（${count}問）</span>
+                    <span>弱点集中復習を開始する (${count}問)</span>
                    </button>`
-                : `<div class="text-center text-xs font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 py-3 rounded-xl">
-                    <i class="fa-solid fa-check-circle text-emerald-400 mr-1"></i> 現在、復習が必要な単語はありません
-                   </div>`;
-            
-            const homeContainer = document.getElementById('home-review-btn-container');
-            if (homeContainer) homeContainer.innerHTML = btnHtml;
+                : `<div class="flex-1 text-center text-xs font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 py-3 rounded-xl">
+                    <i class="fa-solid fa-check-circle text-emerald-400 mr-1"></i> 弱点単語はありません
+                   </div>`
+            }
+            <button type="button" onclick="resetMistakeData()" class="px-3 py-3 text-xs font-bold text-slate-400 hover:text-rose-500 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 hover:border-rose-300 rounded-xl transition flex items-center shrink-0 cursor-pointer" title="弱点リストをリセット">
+                <i class="fa-solid fa-trash-can mr-1"></i>リセット
+            </button>
+        </div>
+    `;
 
-            const resultContainer = document.getElementById('review-btn-container');
-            if (resultContainer) resultContainer.innerHTML = btnHtml;
-        }
-
+    if (homeContainer) homeContainer.innerHTML = btnHtml;
+    if (resultContainer) resultContainer.innerHTML = btnHtml;
+}
         function getStatsData() {
             try {
                 const data = localStorage.getItem(STATS_KEY);
@@ -2351,57 +2410,11 @@ function toggleResultQuickConfig() {
             return Object.values(map).map(item => item.wordObj);
         }
 
-        function renderReviewButtons() {
-            const list = getMistakeList();
-            const count = list.length;
-            
-            const btnHtml = count > 0 
-                ? `<button type="button" onclick="startQuiz('review')" class="w-full bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-sm cursor-pointer">
-                    <i class="fa-solid fa-fire text-rose-500"></i>
-                    <span>弱点集中復習を開始する（${count}問）</span>
-                   </button>`
-                : `<div class="text-center text-xs font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 py-3 rounded-xl">
-                    <i class="fa-solid fa-check-circle text-emerald-400 mr-1"></i> 現在、復習が必要な単語はありません
-                   </div>`;
-            
-            const homeContainer = document.getElementById('home-review-btn-container');
-            if (homeContainer) homeContainer.innerHTML = btnHtml;
+        
+       
 
-            const resultContainer = document.getElementById('review-btn-container');
-            if (resultContainer) resultContainer.innerHTML = btnHtml;
-        }
-
-        function getStatsData() {
-            try {
-                const data = localStorage.getItem(STATS_KEY);
-                return data ? JSON.parse(data) : {};
-            } catch(e) {
-                return {};
-            }
-        }
-
-        function recordAnswerStat(wordNo, isCorrect) {
-            if (!wordNo) return;
-            const stats = getStatsData();
-            const blockIndex = Math.floor((wordNo - 1) / 100);
-            const blockStart = blockIndex * 100 + 1;
-            const blockEnd = (blockIndex + 1) * 100;
-            const key = `No.${blockStart}〜${blockEnd}`;
-
-            if (!stats[key]) {
-                stats[key] = { total: 0, correct: 0 };
-            }
-
-            stats[key].total++;
-            if (isCorrect) stats[key].correct++;
-
-            try {
-                localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-            } catch(e) {}
-            renderStatsGraph();
-        }
-
-        function renderStatsGraph() {
+        
+    function renderStatsGraph() {
             const container = document.getElementById('stats-graph-container');
             if (!container) return;
 
@@ -2518,36 +2531,43 @@ function updateRankUI() {
 
 // 出題する英単語の決定 (天賦モード:7文字制限&自動調整 / その他:通常ランダム)
 function startQuiz(mode) {
+    // 1. 音声機能のアンロック
     if (typeof unlockAudio === 'function') unlockAudio();
 
+    // 2. 既存のタイマーを確実にクリア
     if (typeof timerInterval !== 'undefined') clearInterval(timerInterval);
     if (typeof autoNextInterval !== 'undefined') clearInterval(autoNextInterval);
 
-    const allWords = typeof getAppWordData === 'function' ? getAppWordData() : (window.wordsDataSet || wordsDataSet || []);
+    // 3. 単語データの読み込み
+    const allWords = typeof getAppWordData === 'function' 
+        ? getAppWordData() 
+        : (window.wordsDataSet || wordsDataSet || []);
+        
     if (!allWords || allWords.length === 0) {
         alert("単語データが空です。wordsDataSet にデータを入力してください。");
         return;
     }
 
-    // ① 出題数の取得(手入力またはスライダー)
+    // 4. 出題数の取得（入力欄 または スライダー）
     const countInput = document.getElementById('question-count-input')?.value;
     const sliderVal = document.getElementById('question-count-slider')?.value;
     selectedCount = parseInt(countInput || sliderVal, 10) || 10;
-    sessionGainedScore = 0; // スコアリセット
 
+    // 5. ゲーム状態・スコア初期化
+    sessionGainedScore = 0;
     isPaused = false;
     currentQuizTimeLeft = 0;
     autoNextWaitLeft = 0;
     currentCombo = 0;
     maxCombo = 0;
     answerHistory = [];
+    scoreCount = 0;
+    currentIndex = 0;
 
     const overlay = document.getElementById('pause-overlay');
     if (overlay) overlay.style.display = 'none';
 
-    scoreCount = 0;
-    currentIndex = 0;
-
+    // シャッフル補助関数
     const arrayShuffle = (arr) => {
         const result = [...arr];
         for (let i = result.length - 1; i > 0; i--) {
@@ -2559,7 +2579,9 @@ function startQuiz(mode) {
 
     const mistakeList = typeof getMistakeList === 'function' ? getMistakeList() : [];
 
-    if (mode === 'session review') {
+    // 6. モード別の問題選出分岐
+    if (mode === 'session_review') {
+        // --- 直前に間違えた問題の復習モード ---
         if (!Array.isArray(currentSessionWrong) || currentSessionWrong.length === 0) {
             alert("この回で間違えた単語はありません！全問正解です！🎉");
             return;
@@ -2568,6 +2590,7 @@ function startQuiz(mode) {
         currentSessionWrong = [];
 
     } else if (mode === 'review') {
+        // --- 弱点集中練習モード ---
         if (!Array.isArray(mistakeList) || mistakeList.length === 0) {
             alert("現在、復習対象の弱点単語はありません。");
             return;
@@ -2582,11 +2605,11 @@ function startQuiz(mode) {
         quizQuestions = arrayShuffle(uniqueMistakes).slice(0, selectedCount);
 
     } else {
+        // --- 通常モード（範囲・難易度・通常クイズ） ---
         currentSessionWrong = [];
 
-        // ボタン選択(selectedDifficulty) を優先参照し、無ければ #level-select を参照
-        const levelSelect = (typeof selectedDifficulty !== 'undefined' && selectedDifficulty) 
-            ? selectedDifficulty 
+        const levelSelect = (typeof selectedDifficulty !== 'undefined' && selectedDifficulty)
+            ? selectedDifficulty
             : (document.getElementById('level-select')?.value || 'all');
 
         const selectedRange = document.getElementById('range-select')?.value || 'all';
@@ -2604,31 +2627,26 @@ function startQuiz(mode) {
             }
         }
 
-        // --- ③ モード別の抽出分岐 ---
-        const TENFU_THRESHOLD = 7;   // 天賦は7文字以上
-        const KIWAMI_THRESHOLD = 8;  // 極は8文字以上
+        const TENFU_THRESHOLD = 7;
+        const KIWAMI_THRESHOLD = 8;
         const getWordString = (w) => String(w.word || w.english || "").trim();
 
         if (levelSelect === 'tenfu') {
-            // 【天賦モード】7文字以上を優先(足りない分は7文字未満から出題数を補填)
             const over7Pool = arrayShuffle(filteredWords.filter(w => getWordString(w).length >= TENFU_THRESHOLD));
             const under7Pool = arrayShuffle(filteredWords.filter(w => getWordString(w).length < TENFU_THRESHOLD));
-
             let picked = over7Pool.slice(0, selectedCount);
 
             if (picked.length < selectedCount) {
                 const need = selectedCount - picked.length;
                 picked = picked.concat(under7Pool.slice(0, need));
             }
-
             quizQuestions = arrayShuffle(picked);
 
         } else if (levelSelect === 'kiwami' || levelSelect === 'ultimate') {
-            // 【極モード】絶対8文字以上のみ(足りなくても補填せず、存在する分だけで出題)
             const kiwamiPool = filteredWords.filter(w => getWordString(w).length >= KIWAMI_THRESHOLD);
 
             if (kiwamiPool.length === 0) {
-                alert(`選択範囲(No.${selectedRange})に${KIWAMI_THRESHOLD}文字以上の単語がありません。範囲を広げてくだい。`);
+                alert(`選択範囲(No.${selectedRange})に${KIWAMI_THRESHOLD}文字以上の単語がありません。範囲を広げてください。`);
                 return;
             }
 
@@ -2636,7 +2654,6 @@ function startQuiz(mode) {
             quizQuestions = shuffled.slice(0, Math.min(selectedCount, shuffled.length));
 
         } else {
-            // 【通常モード（基礎・応用・発展・全般）】
             if (levelSelect !== 'all') {
                 const hasLevelProp = filteredWords.some(w => w.level !== undefined);
                 if (hasLevelProp) {
@@ -2654,17 +2671,33 @@ function startQuiz(mode) {
         }
     }
 
-    // クイズ画面への切り替えと初期化
-    document.getElementById('start-screen')?.classList.add('hidden');
-    document.getElementById('quiz-screen')?.classList.remove('hidden');
-    document.getElementById('result-screen')?.classList.add('hidden');
+   // 7. 画面表示の切り替え
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const statsContainer = document.getElementById('stats-graph-container');
 
+    [startScreen, quizScreen, resultScreen].forEach(el => {
+        if (el) el.style.display = '';
+    });
+
+    if (startScreen) startScreen.classList.add('hidden');
+    if (resultScreen) resultScreen.classList.add('hidden');
+    
+    // アナリティクスグラフの枠全体を非表示
+    if (statsContainer && statsContainer.parentElement) {
+        statsContainer.parentElement.classList.add('hidden');
+    }
+
+    if (quizScreen) quizScreen.classList.remove('hidden');
+
+    // 8. 最初の問題を出題
     if (typeof showQuestion === 'function') {
         showQuestion();
     }
 }
-
-        // ② 問題表示 & 4択ダミーの毎回完全ランダム化
+       
+// ② 問題表示 & 4択ダミーの毎回完全ランダム化
         function showQuestion() {
             isAnswered = false;
 
@@ -2997,8 +3030,8 @@ if (typeof showFeedback === 'function') showFeedback(true, `正解! +${gainedPoi
     
     if (typeof startAutoNext === 'function') startAutoNext(false);
 }
-    
-  function showFeedback(isSuccess, text, wordObj) {
+   
+		function showFeedback(isSuccess, text, wordObj) {
             const box = document.getElementById('feedback-box');
             const fText = document.getElementById('feedback-text');
             const synContainer = document.getElementById('synonyms-container');
@@ -3131,13 +3164,28 @@ if (typeof showFeedback === 'function') showFeedback(true, `正解! +${gainedPoi
     updateRankUI();
     }
 
-        function showStartScreen() {
-            document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
-            renderReviewButtons();
-            renderStatsGraph();
-        }
+       function showStartScreen() {
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const statsContainer = document.getElementById('stats-graph-container');
+
+    [startScreen, quizScreen, resultScreen].forEach(el => {
+        if (el) el.style.display = '';
+    });
+
+    if (quizScreen) quizScreen.classList.add('hidden');
+    if (resultScreen) resultScreen.classList.add('hidden');
+    if (startScreen) startScreen.classList.remove('hidden');
+
+    // アナリティクスグラフの枠全体を再表示
+    if (statsContainer && statsContainer.parentElement) {
+        statsContainer.parentElement.classList.remove('hidden');
+    }
+
+    if (typeof renderReviewButtons === 'function') renderReviewButtons();
+    if (typeof renderStatsGraph === 'function') renderStatsGraph();
+}
 
         function shuffleArray(array) {
             let curId = array.length;
